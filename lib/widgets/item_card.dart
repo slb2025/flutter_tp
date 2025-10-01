@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tp_widget/models/item.dart';
 
+import 'item_detail_screen.dart';
+
 // --- Définition de la classe du widget ---
 class ItemCard extends StatelessWidget {
   final Item item;
@@ -63,6 +65,11 @@ class ItemCard extends StatelessWidget {
 
           // --- Action au clic sur la carte ---
           onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ItemDetailScreen(item: item),
+              ),
+            );
             print('Ouverture du contrat ${item.name}');
           },
         ),

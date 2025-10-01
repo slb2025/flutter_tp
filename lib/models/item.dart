@@ -35,10 +35,5 @@ class Item {
       imageAsset: 'assets/yamaha_mt07.webp',
     ),
   ];
-
-  static void add(Item newItem) {
-    items.add(newItem);
-
-  }
 }
 

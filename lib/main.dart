@@ -34,20 +34,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
+  List<Item> _contracts = Item.items;
+
   // Variable d'état pour la BottomNavigationBar
   int _selectedIndex = 0;
-
-  // Liste des widgets à afficher en fonction de _selectedIndex
-  late final List<Widget> _widgetOptions;
-
 
   @override
   void initState() {
     super.initState();
-    _widgetOptions = <Widget>[
-      const ItemListContent(),   // Le contenu de votre liste de contrats
-      const ContributionPage(),  // La page de contribution
-    ];
+  }
+
+  void _addNewContract(Item newContract) {
+    setState(() {
+      _contracts.add(newContract);
+      // Optionnel : s'assurer que l'onglet 'Mes assurances' est sélectionné
+      _selectedIndex = 0;
+    });
   }
 
   void _onItemTapped(int index) {
@@ -58,6 +60,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    final List<Widget> widgetOptions = <Widget>[
+      ItemListContent(
+        items: _contracts,
+        onAddContract: _addNewContract,
+      ),
+      const ContributionPage(),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -97,16 +108,21 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: widgetOptions.elementAt(_selectedIndex),
 
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
+              onPressed: () async {
+                // Utiliser 'await' pour attendre le résultat (le nouvel Item)
+                final Item? newContract = await Navigator.of(context).push(
+                  MaterialPageRoute<Item>(
                     builder: (context) => const NewContractScreen(),
                   ),
                 );
+                // Vérifier si un Item a été renvoyé (si l'utilisateur n'a pas juste fait retour)
+                if (newContract != null) {
+                  _addNewContract(newContract); // Utiliser la fonction pour mettre à jour l'état
+                }
               },
               child: const Icon(Icons.add),
               backgroundColor: Theme.of(context).primaryColor,
@@ -138,14 +154,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
 // Widget séparé pour le contenu de la liste des items
 class ItemListContent extends StatelessWidget {
-  const ItemListContent({super.key});
+  final List<Item> items;
+  final Function(Item) onAddContract;
+
+  const ItemListContent({
+    super.key,
+    required this.items,
+    required this.onAddContract,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final List<Item> items = Item.items;
     return ListView.builder(
         itemCount: items.length,
-        // Supprimez le padding: const EdgeInsets.all(100) qui décalait la liste
         itemBuilder: (context, index) {
           return ItemCard(item: items[index]);
         }

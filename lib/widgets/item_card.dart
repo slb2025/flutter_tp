@@ -7,11 +7,14 @@ import 'item_detail_screen.dart';
 class ItemCard extends StatelessWidget {
   final Item item;
   final VoidCallback? onTapDelete;
+  final VoidCallback? onTapDetail;
+
 
   const ItemCard({
     super.key,
     required this.item,
     this.onTapDelete,
+    this.onTapDetail,
   });
 
   // --- Méthode utilitaire pour construire l'image d'en-tête ---
@@ -64,14 +67,7 @@ class ItemCard extends StatelessWidget {
           ),
 
           // --- Action au clic sur la carte ---
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => ItemDetailScreen(item: item),
-              ),
-            );
-            print('Ouverture du contrat ${item.name}');
-          },
+          onTap: onTapDetail,
         ),
       ),
     );

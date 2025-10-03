@@ -3,6 +3,11 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tp_widget/models/item.dart';
 
+// Imports pour le service API
+import '../models/vehicle_api_data.dart';
+import '../services/vehicle_api_service.dart';
+
+
 // --- Définition des Constantes du Formulaire (Externalisées) ---
 const List<String> _vehicleNames = [
   'Peugeot 308',
@@ -51,6 +56,17 @@ class _ContractFormScreenState extends State<ContractFormScreen> {
   DateTime? _selectedDate;
   String? _selectedWarranty;
 
+  // NOTE: Suppression de la ligne 'final Item? itemToEdit;' car redondant avec widget.itemToEdit
+
+  VehicleApiData? _apiData; // Stocke l'objet désérialisé
+  bool _isLoading = false; // Pour afficher un indicateur de chargement
+  late final VehicleApiService _apiService; // Instance du service
+
+  // Initialisation du service dans le constructeur (avant initState)
+  _ContractFormScreenState() {
+    _apiService = VehicleApiService();
+  }
+
   final TextEditingController _puissanceController = TextEditingController();
   final TextEditingController _kilometrageController = TextEditingController();
   final TextEditingController _immatController = TextEditingController();
@@ -78,6 +94,31 @@ class _ContractFormScreenState extends State<ContractFormScreen> {
     }
 
     return value;
+  }
+
+  // Méthode de récupération de données déléguée au service
+  Future<void> _fetchVehicleData() async {
+    setState(() {
+      _isLoading = true; // Début du chargement
+    });
+
+    // 🚀 Appel du service externalisé
+    final vehicleData = await _apiService.fetchVehicleData(1);
+
+    // Mise à jour des champs du formulaire avec les données de l'API
+    if (vehicleData != null) {
+      setState(() {
+        _apiData = vehicleData;
+        _contractNumberController.text = 'API-${vehicleData.id}';
+        // Simuler l'affectation d'une donnée technique (ex: Motorisation)
+        _selectedMotorisation = vehicleData.completed ? 'Hybride' : 'Essence';
+      });
+    }
+
+    // Le setState final pour désactiver le chargement est toujours exécuté.
+    setState(() {
+      _isLoading = false; // Fin du chargement
+    });
   }
 
   @override
@@ -124,6 +165,8 @@ class _ContractFormScreenState extends State<ContractFormScreen> {
       // --- Mode CRÉATION (Valeurs par défaut ou null) ---
       // Laisse les champs à null, sauf la date par défaut.
       _selectedDate = DateTime.now();
+      // Appel de l'API ici au lieu d'afficher une liste
+      _fetchVehicleData();
     }
   }
 
@@ -136,7 +179,7 @@ class _ContractFormScreenState extends State<ContractFormScreen> {
     super.dispose();
   }
 
-  // --- NOUVEAU : Fonction de soumission unique ---
+  // --- NOUVEAU : Fonction de soumission unique (inchangée) ---
   void _handleSubmit(BuildContext context) {
     if (_formKey.currentState!.validate() &&
         _selectedName != null &&
@@ -216,6 +259,22 @@ class _ContractFormScreenState extends State<ContractFormScreen> {
         : "Ajouter un nouveau contrat";
     final buttonText = isEditing ? 'Mettre à jour le contrat' : 'Enregistrer le contrat';
 
+    // Affichage de l'indicateur de chargement si l'API est en cours d'appel
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 10),
+              Text("Chargement des données techniques..."),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(appBarTitle),
@@ -229,8 +288,7 @@ class _ContractFormScreenState extends State<ContractFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              // --- Tous les champs du formulaire (identiques) ---
-              // ... (Logique de buildForm dupliquée ici) ...
+              // --- Tous les champs du formulaire (inchangés) ---
 
               // --- Séparation et titre de section pour l'identification ---
               const Text('1. Identification du Contrat',

@@ -38,6 +38,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   go_router: ^16.2.4
+  http: ^1.5.0
 
 dev_dependencies:
   flutter_test:

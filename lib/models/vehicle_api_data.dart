@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 class VehicleApiData {
   final int id;
   final String title;
@@ -11,9 +9,7 @@ class VehicleApiData {
     required this.completed,
   });
 
-  // Constructeur Factory pour la désérialisation
   factory VehicleApiData.fromJson(Map<String, dynamic> json) {
-    // La méthode fromJson crée un objet à partir du Map JSON
     return VehicleApiData(
       id: json['id'] as int,
       title: json['title'] as String,

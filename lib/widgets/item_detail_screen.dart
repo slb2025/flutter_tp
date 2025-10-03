@@ -12,35 +12,24 @@ class ItemDetailScreen extends StatelessWidget {
   });
 
   void _onTapEdit(BuildContext context) async {
-    // 1. Ouvrir l'écran d'édition et attendre l'Item mis à jour
     final Item? updatedItem = await context.push<Item?>(
-      // Appel de la route /edit_contract
       '/edit_contract',
       extra: item,
     );
 
-    // 2. Si un résultat (Item) est renvoyé (l'utilisateur a cliqué sur Mettre à jour)
     if (updatedItem != null) {
-      // 3. Renvoyer cet Item mis à jour à l'écran précédent (ItemListContent)
       context.pop(updatedItem);
     }
   }
-    // --- Fonctions d'aide pour extraire les données de la chaîne ---
 
-  // Extrait une valeur spécifique d'une chaîne formatée (ex: "Clé: Valeur | ...")
   static _extractValue(String source, String key, [String defaultValue = 'Non renseigné']) {
     if (source.isEmpty) return defaultValue;
-    // Recherche de la clé suivie de la valeur jusqu'à un pipe ou la fin de la chaîne
     final regex = RegExp('$key: (.+?)(\\s*\\||\$)');
     final match = regex.firstMatch(source);
     return match != null ? match.group(1)!.trim() : defaultValue;
   }
 
-  // --- Widgets Utilitaires pour l'Affichage ---
-
-  // Widget utilitaire pour afficher les lignes de détail
   static Widget _buildDetailRow(BuildContext context, String label, String value, IconData icon, {bool isTitle = false}) {
-    // ... (Code de _buildDetailRow inchangé)
     return Padding(
       padding: EdgeInsets.only(bottom: 15.0, top: isTitle ? 10.0 : 0),
       child: Row(
@@ -79,8 +68,6 @@ class ItemDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    // --- Logique d'extraction des données ---
-
     final numContrat = _extractValue(item.description, 'Contrat n°');
     final garantie = _extractValue(item.description, 'Garantie');
     final typeVehicule = _extractValue(item.detail ?? '', 'Type');
@@ -109,7 +96,6 @@ class ItemDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Image ---
             Center(
               child: SizedBox(
                 width: 150,
@@ -128,9 +114,6 @@ class ItemDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 25),
 
-            // #################################################################
-            // SECTION 1 : Identification & Administration
-            // #################################################################
             _buildDetailRow(context, '1. Identification du Contrat', '', Icons.assignment, isTitle: true),
 
             _buildDetailRow(
@@ -166,10 +149,6 @@ class ItemDetailScreen extends StatelessWidget {
             const Divider(),
             const SizedBox(height: 10),
 
-
-            // #################################################################
-            // SECTION 2 : Caractéristiques techniques (Extraites de item.detail)
-            // #################################################################
             _buildDetailRow(context, '2. Caractéristiques techniques', '', Icons.settings, isTitle: true),
 
             _buildDetailRow(
@@ -193,10 +172,6 @@ class ItemDetailScreen extends StatelessWidget {
             const Divider(),
             const SizedBox(height: 10),
 
-
-            // #################################################################
-            // SECTION 3 : Données d'usage (Extraites de item.detail)
-            // #################################################################
             _buildDetailRow(context, '3. Données d\'usage', '', Icons.people, isTitle: true),
 
             _buildDetailRow(
